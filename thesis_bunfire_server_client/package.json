@@ -1,0 +1,11 @@
+{
+  "name": "thesis_bunfire_server_client",
+  "module": "main.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

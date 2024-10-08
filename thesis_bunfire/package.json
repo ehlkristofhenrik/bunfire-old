@@ -1,0 +1,15 @@
+{
+  "name": "thesis_bunfire",
+  "module": "main.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "js-regression": "^1.0.10"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.7.0"
+  }
+}
